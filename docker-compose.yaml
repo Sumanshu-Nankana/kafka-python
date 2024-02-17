@@ -1,8 +1,5 @@
 version: '3.7'
-name: redpanda-group
-networks:
-  redpanda_network:
-    driver: bridge
+name: redpanda-services
 services:
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v23.3.5
@@ -11,31 +8,28 @@ services:
       - redpanda start
       - --smp 1
       - --overprovisioned
-      - --kafka-addr internal://0.0.0.0:29092
-      - --advertise-kafka-addr internal://redpanda:29092,external://localhost:9092
-      - --pandaproxy-addr internal://0.0.0.0:28082,external://0.0.0.0:8082
-      - --advertise-pandaproxy-addr internal://redpanda:28082,external://localhost:8082
-      - --schema-registry-addr internal://0.0.0.0:28081,external://0.0.0.0:8081
+      - --kafka-addr internal://0.0.0.0:19092,external://0.0.0.0:9092
+      - --advertise-kafka-addr internal://redpanda:19092,external://localhost:9092
+      - --pandaproxy-addr internal://0.0.0.0:18082,external://0.0.0.0:8082
+      - --advertise-pandaproxy-addr internal://redpanda:18082,external://localhost:8082
+      - --schema-registry-addr internal://0.0.0.0:18081,external://0.0.0.0:8081
     ports:
       - 8081:8081
       - 8082:8082
       - 9092:9092
-      - 29092:29092
-    networks:
-      - redpanda_network
   redpanda-console:
-    container_name: redpanda-console
     image: docker.redpanda.com/redpandadata/console:v2.4.3
+    container_name: redpanda-console
     entrypoint: /bin/sh
-    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
+    command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
     environment:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda:29092"]
+          brokers: ["redpanda:19092"]
           schemaRegistry:
             enabled: true
-            urls: ["http://redpanda:8081"]
+            urls: ["http://redpanda:18081"]
         redpanda:
           adminApi:
             enabled: true
@@ -44,5 +38,3 @@ services:
       - 8080:8080
     depends_on:
       - redpanda
-    networks:
-      - redpanda_network
