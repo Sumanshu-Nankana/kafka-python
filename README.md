@@ -13,8 +13,8 @@ docker-compose -f docker-compose-1-node.yaml down
 docker-compose -f docker-compose-3-nodes.yaml down
 ```
 
-### Run the Producer (Make Sure Redpanda Cluster is up.)
+### Run the Producer (_Make Sure Redpanda Cluster is up_.)
 
 ```
-python producer.py
+python src\producer.py
 ```

@@ -25,10 +25,17 @@ class ProducerClass:
         """
         try:
             self.producer.produce(self.topic, message)
-            self.producer.flush()
+            # self.producer.flush()
             logging.info(f"Message sent to topic {self.topic}: {message}")
         except Exception as e:
             logging.error(f"Error sending message: {e}")
+
+    def commit(self):
+        """
+        Commit the message
+        """
+        self.producer.flush()
+        logging.info("Messages committed to Kafka.")
 
 
 if __name__ == "__main__":
@@ -49,3 +56,5 @@ if __name__ == "__main__":
             producer.send_message(message)
     except KeyboardInterrupt:
         pass
+
+    producer.commit()
