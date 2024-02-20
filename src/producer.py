@@ -47,9 +47,8 @@ if __name__ == "__main__":
 
     admin = Admin(bootstrap_servers)
     producer = ProducerClass(bootstrap_servers, topic)
+    admin.create_topic(topic)
 
-    if not admin.topic_exists(topic):
-        admin.create_topic(topic)
     try:
         while True:
             message = input("Enter any message: ")
