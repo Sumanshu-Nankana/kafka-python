@@ -1,13 +1,18 @@
+"""The Producer code will Serialize the JSON message.
+
+by getting the schema from the Schema Registry
+CANNOT test - https://github.com/redpanda-data/redpanda/issues/14462
+Redpanda does not support JSON Schema Registry
+"""
 import json
 import logging
 import os
-
-import jsonschema
 
 import logging_config
 import utils
 from admin import Admin
 from producer import ProducerClass
+from schema_registry_client import SchemaClient
 
 
 class User:
@@ -30,24 +35,16 @@ def user_to_dict(user):
 
 
 class JSONProducer(ProducerClass):
-    def __init__(self, bootstrap_server, topic, schema):
+    def __init__(self, bootstrap_server, topic):
         super().__init__(bootstrap_server, topic)
-        self.schema = schema
         self.value_serializer = lambda v: json.dumps(v).encode("utf-8")
 
     def send_message(self, message_dict):
         try:
-            # Validate message against JSON schema
-            jsonschema.validate(message_dict, self.schema)
-            logging.info("Schema Validated")
-
             # Convert message to JSON string and serialize
             message_json = self.value_serializer(message_dict)
             self.producer.produce(self.topic, message_json)
             logging.info(f"Message Sent: {message_json}")
-        except jsonschema.ValidationError as e:
-            logging.error(f"Validation Error: {e}")
-            return
         except Exception as e:
             logging.error(f"Error sending message: {e}")
 
@@ -58,17 +55,24 @@ if __name__ == "__main__":
 
     bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS")
     topic = os.environ.get("KAFKA_TOPIC")
+    schema_url = os.environ.get("SCHEMA_URL")
 
     """
-    Loading using load(), because validate() function
-    need schema in form of python dictionary
+    Reading using read() function, because SchemaClient register_schema
+    function required schema in form of string
     """
     with open("./schemas/schema.json") as json_schema_file:
-        json_schema = json.load(json_schema_file)
+        json_schema = json_schema_file.read()
 
     admin = Admin(bootstrap_servers)
-    producer = JSONProducer(bootstrap_servers, topic, json_schema)
     admin.create_topic(topic)
+
+    # Can not test in REDPANDA, Because REDPANDA does not support JSON
+    # https://github.com/redpanda-data/redpanda/issues/14462
+    schema_client = SchemaClient(schema_url, topic, json_schema, "JSON")
+    schema_client.register_schema()
+
+    producer = JSONProducer(bootstrap_servers, topic)
 
     try:
         while True:

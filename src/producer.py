@@ -1,3 +1,4 @@
+"""The Producer code will manually validate the schema."""
 import logging
 import os
 
@@ -12,7 +13,7 @@ class ProducerClass:
     """Producer class for sending messages to Kafka."""
 
     def __init__(self, bootstrap_servers, topic):
-        """Initializes the producer"""
+        """Initializes the producer."""
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
         self.producer = Producer({"bootstrap.servers": self.bootstrap_servers})
@@ -31,9 +32,7 @@ class ProducerClass:
             logging.error(f"Error sending message: {e}")
 
     def commit(self):
-        """
-        Commit the message
-        """
+        """Commit the message."""
         self.producer.flush()
         logging.info("Messages committed to Kafka.")
 
@@ -44,6 +43,7 @@ if __name__ == "__main__":
 
     bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS")
     topic = os.environ.get("KAFKA_TOPIC")
+    schema_url = os.environ.get("SCHEMA_URL")
 
     admin = Admin(bootstrap_servers)
     producer = ProducerClass(bootstrap_servers, topic)
