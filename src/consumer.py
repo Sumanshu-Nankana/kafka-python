@@ -18,7 +18,7 @@ class ConsumerClass:
         )
 
     def consume_messages(self):
-        """Consume Messages from Kafka"""
+        """Consume Messages from Kafka."""
         self.consumer.subscribe([self.topic])
         logging.info(f"Successfully subscribed to topic: {self.topic}")
 
@@ -30,9 +30,14 @@ class ConsumerClass:
                 if msg.error():
                     logging.error(f"Consumer error: {msg.error()}")
                     continue
+                byte_message = msg.value()
+                decoded_message = byte_message.decode("utf-8")
                 logging.info(
-                    f"Received message: " f"{msg.value().decode('utf-8')}"
-                )  # noqa: E501
+                    f"Byte message: {byte_message}, Type: {type(byte_message)}"
+                )
+                logging.info(
+                    f"Decoded message: {decoded_message}, Type: {type(decoded_message)}"  # noqa: E501
+                )
         except KeyboardInterrupt:
             pass
         finally:
