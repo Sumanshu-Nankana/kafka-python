@@ -46,9 +46,9 @@ if __name__ == "__main__":
     schema_url = os.environ.get("SCHEMA_URL")
     schema_type = "JSON"
 
+    # In redpanda, JSON Schema not supported, but AVRO and PROTOBUF supported
     with open("./schemas/schema.json") as json_schema_file:
         json_schema = json_schema_file.read()
-        logging.info(json_schema, type(json_schema))
 
     schema_client = SchemaClient(schema_url, topic, json_schema, schema_type)
     schema_client.register_schema()
