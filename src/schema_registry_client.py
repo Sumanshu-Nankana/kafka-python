@@ -12,11 +12,11 @@ class SchemaClient:
         self.schema_subject_name = schema_subject_name
         self.schema = schema
         self.schema_type = schema_type
-        self.schema_client = SchemaRegistryClient({"url": self.schema_url})
+        self.schema_registry_client = SchemaRegistryClient({"url": self.schema_url})
 
     def schema_exists_in_registry(self):
         try:
-            self.schema_client.get_latest_version(self.schema_subject_name)
+            self.schema_registry_client.get_latest_version(self.schema_subject_name)
             return True
         except SchemaRegistryError:
             return False
@@ -25,7 +25,7 @@ class SchemaClient:
         """Register the Schema in Schema Registry."""
         if not self.schema_exists_in_registry():
             try:
-                self.schema_client.register_schema(
+                self.schema_registry_client.register_schema(
                     subject_name=self.schema_subject_name,
                     schema=Schema(self.schema, schema_type=self.schema_type),
                 )
