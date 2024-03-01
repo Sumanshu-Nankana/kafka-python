@@ -67,9 +67,11 @@ if __name__ == "__main__":
     schema_client = SchemaClient(schema_registry_url, topic, avro_schema, schema_type)
     schema_client.register_schema()
 
+    # fetch schema_str from Schema Registry
+    schema_str = schema_client.get_schema_str()
     # Produce messages
     producer = AvroProducer(
-        bootstrap_servers, topic, schema_client.schema_registry_client, avro_schema
+        bootstrap_servers, topic, schema_client.schema_registry_client, schema_str
     )
 
     try:

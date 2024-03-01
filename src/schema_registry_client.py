@@ -4,6 +4,9 @@ import os
 from confluent_kafka.schema_registry import Schema, SchemaRegistryClient
 from confluent_kafka.schema_registry.error import SchemaRegistryError
 
+import logging_config
+import utils
+
 
 class SchemaClient:
     def __init__(self, schema_url, schema_subject_name, schema, schema_type):
@@ -12,18 +15,30 @@ class SchemaClient:
         self.schema_subject_name = schema_subject_name
         self.schema = schema
         self.schema_type = schema_type
+        print(self.schema_url)
         self.schema_registry_client = SchemaRegistryClient({"url": self.schema_url})
 
-    def schema_exists_in_registry(self):
+    def get_schema_id(self):
         try:
-            self.schema_registry_client.get_latest_version(self.schema_subject_name)
-            return True
+            schema_version = self.schema_registry_client.get_latest_version(
+                self.schema_subject_name
+            )
+            schema_id = schema_version.schema_id
+            return schema_id
         except SchemaRegistryError:
             return False
 
+    def get_schema_str(self):
+        try:
+            schema_id = self.get_schema_id()
+            schema = self.schema_registry_client.get_schema(schema_id)
+            return schema.schema_str
+        except SchemaRegistryError as e:
+            logging.error(e)
+
     def register_schema(self):
         """Register the Schema in Schema Registry."""
-        if not self.schema_exists_in_registry():
+        if not self.get_schema_id():
             try:
                 self.schema_registry_client.register_schema(
                     subject_name=self.schema_subject_name,
@@ -42,13 +57,16 @@ class SchemaClient:
 
 
 if __name__ == "__main__":
+    utils.load_env()
+    logging_config.configure_logging()
     topic = os.environ.get("KAFKA_TOPIC")
-    schema_url = os.environ.get("SCHEMA_URL")
-    schema_type = "JSON"
+    schema_url = os.environ.get("SCHEMA_REGISTRY_URL")
+    schema_type = "AVRO"
 
     # In redpanda, JSON Schema not supported, but AVRO and PROTOBUF supported
-    with open("./schemas/schema.json") as json_schema_file:
-        json_schema = json_schema_file.read()
+    with open("./schemas/schema.avsc") as avro_schema_file:
+        avro_schema = avro_schema_file.read()
 
-    schema_client = SchemaClient(schema_url, topic, json_schema, schema_type)
+    schema_client = SchemaClient(schema_url, topic, avro_schema, schema_type)
     schema_client.register_schema()
+    schema_client.get_schema_str()
