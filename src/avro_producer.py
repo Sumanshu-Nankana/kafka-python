@@ -35,6 +35,17 @@ def user_to_dict(user):
     )
 
 
+def delivery_report(err, msg):
+    if err is not None:
+        logging.error(
+            f"Delivery failed for User record for {msg.key()} with error {err}"
+        )
+        return
+    logging.info(
+        f"Successfully produced User record: key - {msg.key()}, topic - {msg.topic}, partition - {msg.partition()}, offset - {msg.offset()}"
+    )
+
+
 class AvroProducer(ProducerClass):
     def __init__(self, bootstrap_server, topic, schema_registry_client, schema_str):
         super().__init__(bootstrap_server, topic)
@@ -53,6 +64,7 @@ class AvroProducer(ProducerClass):
                 key=self.string_serializer(str(uuid4())),
                 value=message,
                 headers={"correlation_id": str(uuid4())},
+                on_delivery=delivery_report,
             )
             logging.info(f"Message sent successfully: {message}")
         except Exception as e:
