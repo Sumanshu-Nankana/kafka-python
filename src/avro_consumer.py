@@ -23,7 +23,7 @@ class AvroConsumerClass:
         )
         self.schema_registry_client = schema_registry_client
         self.schema_str = schema_str
-        self.value_deserializer = AvroDeserializer(schema_registry_client, schema_str)
+        self.avro_deserializer = AvroDeserializer(schema_registry_client, schema_str)
 
     def consume_messages(self):
         """Consume Messages from Kafka."""
@@ -42,7 +42,7 @@ class AvroConsumerClass:
                 logging.info(
                     f"Byte message: {byte_message}, Type: {type(byte_message)}"
                 )
-                decoded_message = self.value_deserializer(
+                decoded_message = self.avro_deserializer(
                     byte_message, SerializationContext(topic, MessageField.VALUE)
                 )
                 logging.info(

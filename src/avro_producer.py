@@ -1,8 +1,13 @@
 import logging
 import os
+from uuid import uuid4
 
 from confluent_kafka.schema_registry.avro import AvroSerializer
-from confluent_kafka.serialization import MessageField, SerializationContext
+from confluent_kafka.serialization import (
+    MessageField,
+    SerializationContext,
+    StringSerializer,
+)
 
 import logging_config
 import utils
@@ -35,14 +40,20 @@ class AvroProducer(ProducerClass):
         super().__init__(bootstrap_server, topic)
         self.schema_registry_client = schema_registry_client
         self.schema_str = schema_str
-        self.value_serializer = AvroSerializer(schema_registry_client, schema_str)
+        self.avro_serializer = AvroSerializer(schema_registry_client, schema_str)
+        self.string_serializer = StringSerializer("utf-8")
 
     def send_message(self, message):
         try:
-            message = self.value_serializer(
+            message = self.avro_serializer(
                 message, SerializationContext(topic, MessageField.VALUE)
             )
-            self.producer.produce(self.topic, message)
+            self.producer.produce(
+                topic=self.topic,
+                key=self.string_serializer(str(uuid4())),
+                value=message,
+                headers={"correlation_id": str(uuid4())},
+            )
             logging.info(f"Message sent successfully: {message}")
         except Exception as e:
             logging.error(f"Error while sending message: {e}")
