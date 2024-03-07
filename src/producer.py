@@ -12,11 +12,20 @@ from admin import Admin
 class ProducerClass:
     """Producer class for sending messages to Kafka."""
 
-    def __init__(self, bootstrap_servers, topic):
+    def __init__(
+        self, bootstrap_servers, topic, compression_type=None, message_size=None
+    ):
         """Initializes the producer."""
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
-        self.producer = Producer({"bootstrap.servers": self.bootstrap_servers})
+        self.producer_conf = {"bootstrap.servers": self.bootstrap_servers}
+
+        if compression_type:
+            self.producer_conf["compression.type"] = compression_type
+        if message_size:
+            self.producer_conf["message.max.bytes"] = message_size
+
+        self.producer = Producer(self.producer_conf)
 
     def send_message(self, message):
         """Sends a message to Kafka.

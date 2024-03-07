@@ -14,6 +14,7 @@ import utils
 from admin import Admin
 from producer import ProducerClass
 from schema_registry_client import SchemaClient
+from confluent_kafka import KafkaException
 
 
 class User:
@@ -47,8 +48,16 @@ def delivery_report(err, msg):
 
 
 class AvroProducer(ProducerClass):
-    def __init__(self, bootstrap_server, topic, schema_registry_client, schema_str):
-        super().__init__(bootstrap_server, topic)
+    def __init__(
+        self,
+        bootstrap_server,
+        topic,
+        schema_registry_client,
+        schema_str,
+        compression_type=None,
+        message_size=None,
+    ):
+        super().__init__(bootstrap_server, topic, compression_type, message_size)
         self.schema_registry_client = schema_registry_client
         self.schema_str = schema_str
         self.avro_serializer = AvroSerializer(schema_registry_client, schema_str)
@@ -66,7 +75,13 @@ class AvroProducer(ProducerClass):
                 headers={"correlation_id": str(uuid4())},
                 on_delivery=delivery_report,
             )
-            logging.info(f"Message sent successfully: {message}")
+            logging.info("Message Successfully Produce by the Producer")
+        except KafkaException as e:
+            kafka_error = e.args[0]
+            if kafka_error.MSG_SIZE_TOO_LARGE:
+                logging.error(
+                    f"{e} , Current Message size is {len(message) / (1024 * 1024)} MB"
+                )
         except Exception as e:
             logging.error(f"Error while sending message: {e}")
 
@@ -94,14 +109,19 @@ if __name__ == "__main__":
     schema_str = schema_client.get_schema_str()
     # Produce messages
     producer = AvroProducer(
-        bootstrap_servers, topic, schema_client.schema_registry_client, schema_str
+        bootstrap_servers,
+        topic,
+        schema_client.schema_registry_client,
+        schema_str,
+        compression_type="snappy",
+        message_size=3 * 1024 * 1024,
     )
 
     try:
         while True:
-            first_name = input("Enter first name: ")
-            middle_name = input("Enter middle name: ")
-            last_name = input("Enter last name: ")
+            first_name = input("Enter first name: ") * 100000
+            middle_name = input("Enter middle name: ") * 100000
+            last_name = input("Enter last name: ") * 100000
             age = int(input("Enter age: "))
             user = User(
                 first_name=first_name,
