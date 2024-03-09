@@ -18,21 +18,25 @@ from confluent_kafka import KafkaException
 
 
 class User:
-    def __init__(self, first_name, middle_name, last_name, age):
+    def __init__(self, user_id, first_name, middle_name, last_name, age, email):
+        self.user_id = user_id
         self.first_name = first_name
         self.middle_name = middle_name
         self.last_name = last_name
         self.age = age
+        self.email = email
 
 
 def user_to_dict(user):
     """Return a dictionary representation of a User instance  for
     serialization."""
     return dict(
+        user_id=user.user_id,
         first_name=user.first_name,
         middle_name=user.middle_name,
         last_name=user.last_name,
         age=user.age,
+        email=user.email,
     )
 
 
@@ -74,13 +78,13 @@ class AvroProducer(ProducerClass):
 
     def send_message(self, message):
         try:
-            message = self.avro_serializer(
+            byte_message = self.avro_serializer(
                 message, SerializationContext(topic, MessageField.VALUE)
             )
             self.producer.produce(
                 topic=self.topic,
-                key=self.string_serializer(str(uuid4())),
-                value=message,
+                key=self.string_serializer(str(message["user_id"])),
+                value=byte_message,
                 headers={"correlation_id": str(uuid4())},
                 on_delivery=delivery_report,
             )
@@ -130,15 +134,19 @@ if __name__ == "__main__":
 
     try:
         while True:
+            user_id = int(input("Enter User ID: "))
             first_name = input("Enter first name: ")
             middle_name = input("Enter middle name: ")
             last_name = input("Enter last name: ")
             age = int(input("Enter age: "))
+            email = input("Enter email: ")
             user = User(
+                user_id=user_id,
                 first_name=first_name,
                 middle_name=middle_name,
                 last_name=last_name,
                 age=age,
+                email=email,
             )
             # Prior to serialization, all values must first be converted to a dict instance.
             producer.send_message(user_to_dict(user))

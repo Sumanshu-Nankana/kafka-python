@@ -3,6 +3,10 @@
   "name": "User",
   "fields": [
     {
+      "name": "user_id",
+      "type": "int"
+    },
+    {
       "name": "first_name",
       "type": "string"
     },
@@ -17,6 +21,10 @@
     {
       "name": "age",
       "type": "int"
+    },
+    {
+      "name": "email",
+      "type": "string"
     }
   ]
 }
