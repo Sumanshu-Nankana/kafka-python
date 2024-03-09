@@ -13,7 +13,13 @@ class ProducerClass:
     """Producer class for sending messages to Kafka."""
 
     def __init__(
-        self, bootstrap_servers, topic, compression_type=None, message_size=None
+        self,
+        bootstrap_servers,
+        topic,
+        compression_type=None,
+        message_size=None,
+        batch_size=None,
+        waiting_time=None,
     ):
         """Initializes the producer."""
         self.bootstrap_servers = bootstrap_servers
@@ -24,6 +30,10 @@ class ProducerClass:
             self.producer_conf["compression.type"] = compression_type
         if message_size:
             self.producer_conf["message.max.bytes"] = message_size
+        if batch_size:
+            self.producer_conf["batch.size"] = batch_size
+        if waiting_time:
+            self.producer_conf["linger.ms"] = waiting_time
 
         self.producer = Producer(self.producer_conf)
 

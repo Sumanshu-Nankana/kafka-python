@@ -56,8 +56,17 @@ class AvroProducer(ProducerClass):
         schema_str,
         compression_type=None,
         message_size=None,
+        batch_size=None,
+        waiting_time=None,
     ):
-        super().__init__(bootstrap_server, topic, compression_type, message_size)
+        super().__init__(
+            bootstrap_server,
+            topic,
+            compression_type,
+            message_size,
+            batch_size,
+            waiting_time,
+        )
         self.schema_registry_client = schema_registry_client
         self.schema_str = schema_str
         self.avro_serializer = AvroSerializer(schema_registry_client, schema_str)
@@ -115,13 +124,15 @@ if __name__ == "__main__":
         schema_str,
         compression_type="snappy",
         message_size=3 * 1024 * 1024,
+        batch_size=10_00_00,  # in bytes, 1 MB
+        waiting_time=10_000,  # in milliseconds, 10 seconds
     )
 
     try:
         while True:
-            first_name = input("Enter first name: ") * 100000
-            middle_name = input("Enter middle name: ") * 100000
-            last_name = input("Enter last name: ") * 100000
+            first_name = input("Enter first name: ")
+            middle_name = input("Enter middle name: ")
+            last_name = input("Enter last name: ")
             age = int(input("Enter age: "))
             user = User(
                 first_name=first_name,
