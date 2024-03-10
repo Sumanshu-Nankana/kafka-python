@@ -8,23 +8,43 @@
     },
     {
       "name": "first_name",
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": "null"
     },
     {
       "name": "middle_name",
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": "null"
     },
     {
       "name": "last_name",
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": "null"
     },
     {
       "name": "age",
-      "type": "int"
+      "type": [
+        "null",
+        "int"
+      ],
+      "default": null
     },
     {
       "name": "email",
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": "null"
     }
   ]
 }

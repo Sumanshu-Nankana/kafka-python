@@ -18,7 +18,15 @@ from confluent_kafka import KafkaException
 
 
 class User:
-    def __init__(self, user_id, first_name, middle_name, last_name, age, email):
+    def __init__(
+        self,
+        user_id,
+        first_name=None,
+        middle_name=None,
+        last_name=None,
+        age=None,
+        email=None,
+    ):
         self.user_id = user_id
         self.first_name = first_name
         self.middle_name = middle_name
@@ -76,15 +84,18 @@ class AvroProducer(ProducerClass):
         self.avro_serializer = AvroSerializer(schema_registry_client, schema_str)
         self.string_serializer = StringSerializer("utf-8")
 
-    def send_message(self, message):
+    def send_message(self, key=None, value=None):
         try:
-            byte_message = self.avro_serializer(
-                message, SerializationContext(topic, MessageField.VALUE)
-            )
+            if value:
+                byte_value = self.avro_serializer(
+                    value, SerializationContext(topic, MessageField.VALUE)
+                )
+            else:
+                byte_value = None
             self.producer.produce(
                 topic=self.topic,
-                key=self.string_serializer(str(message["user_id"])),
-                value=byte_message,
+                key=self.string_serializer(str(key)),
+                value=byte_value,
                 headers={"correlation_id": str(uuid4())},
                 on_delivery=delivery_report,
             )
@@ -93,7 +104,7 @@ class AvroProducer(ProducerClass):
             kafka_error = e.args[0]
             if kafka_error.MSG_SIZE_TOO_LARGE:
                 logging.error(
-                    f"{e} , Current Message size is {len(message) / (1024 * 1024)} MB"
+                    f"{e} , Current Message size is {len(value) / (1024 * 1024)} MB"
                 )
         except Exception as e:
             logging.error(f"Error while sending message: {e}")
@@ -134,22 +145,33 @@ if __name__ == "__main__":
 
     try:
         while True:
-            user_id = int(input("Enter User ID: "))
-            first_name = input("Enter first name: ")
-            middle_name = input("Enter middle name: ")
-            last_name = input("Enter last name: ")
-            age = int(input("Enter age: "))
-            email = input("Enter email: ")
-            user = User(
-                user_id=user_id,
-                first_name=first_name,
-                middle_name=middle_name,
-                last_name=last_name,
-                age=age,
-                email=email,
+            action = (
+                input(
+                    "Enter 'insert' to add  a new record or 'delete' to publish tombstone: "
+                )
+                .strip()
+                .lower()
             )
-            # Prior to serialization, all values must first be converted to a dict instance.
-            producer.send_message(user_to_dict(user))
+            if action == "insert":
+                user_id = int(input("Enter User ID: "))
+                first_name = input("Enter first name: ")
+                middle_name = input("Enter middle name: ")
+                last_name = input("Enter last name: ")
+                age = int(input("Enter age: "))
+                email = input("Enter email: ")
+                user = User(
+                    user_id=user_id,
+                    first_name=first_name,
+                    middle_name=middle_name,
+                    last_name=last_name,
+                    age=age,
+                    email=email,
+                )
+                # Prior to serialization, all values must first be converted to a dict instance.
+                producer.send_message(key=user.user_id, value=user_to_dict(user))
+            elif action == "delete":
+                user_id = int(input("Enter User Id to delete: "))
+                producer.send_message(key=user.user_id)
     except KeyboardInterrupt:
         pass
 
