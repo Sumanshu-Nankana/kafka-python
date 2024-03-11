@@ -19,7 +19,11 @@ class AvroConsumerClass:
         self.topic = topic
         self.group_id = group_id
         self.consumer = Consumer(
-            {"bootstrap.servers": bootstrap_server, "group.id": self.group_id}
+            {
+                "bootstrap.servers": bootstrap_server,
+                "group.id": self.group_id,
+                "auto.offset.reset": "latest",
+            }
         )
         self.schema_registry_client = schema_registry_client
         self.schema_str = schema_str
