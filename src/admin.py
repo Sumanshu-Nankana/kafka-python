@@ -23,14 +23,14 @@ class Admin:
         all_topics = self.admin.list_topics()
         return topic_name in all_topics.topics.keys()
 
-    def create_topic(self, topic_name):
+    def create_topic(self, topic_name, partitions=1):
         """Creates a new topic.
 
         Args:
             topic_name (str): Name of the topic to create.
         """
         if not self.topic_exists(topic_name):
-            new_topic = NewTopic(topic_name)
+            new_topic = NewTopic(topic_name, num_partitions=partitions)
             self.admin.create_topics([new_topic])
             logging.info(f"Topic {topic_name} created")
         else:

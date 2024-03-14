@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     # Create Topic
     admin = Admin(bootstrap_servers)
-    admin.create_topic(topic)
+    admin.create_topic(topic, 2)  # second parameter is for number of partitions
 
     # Register the Schema
     with open("./schemas/schema.avsc") as avro_schema_file:

@@ -24,7 +24,10 @@ class ProducerClass:
         """Initializes the producer."""
         self.bootstrap_servers = bootstrap_servers
         self.topic = topic
-        self.producer_conf = {"bootstrap.servers": self.bootstrap_servers}
+        self.producer_conf = {
+            "bootstrap.servers": self.bootstrap_servers,
+            "partitioner": "random",
+        }
 
         if compression_type:
             self.producer_conf["compression.type"] = compression_type

@@ -43,9 +43,6 @@ class AvroConsumerClass:
                     logging.error(f"Consumer error: {msg.error()}")
                     continue
                 byte_message = msg.value()
-                logging.info(
-                    f"Byte message: {byte_message}, Type: {type(byte_message)}"
-                )
                 decoded_message = self.avro_deserializer(
                     byte_message, SerializationContext(topic, MessageField.VALUE)
                 )
