@@ -1,50 +1,30 @@
 {
-  "type": "record",
-  "name": "User",
-  "fields": [
-    {
-      "name": "user_id",
-      "type": "int"
-    },
-    {
-      "name": "first_name",
-      "type": [
-        "string",
-        "null"
-      ],
-      "default": "null"
-    },
-    {
-      "name": "middle_name",
-      "type": [
-        "string",
-        "null"
-      ],
-      "default": "null"
-    },
-    {
-      "name": "last_name",
-      "type": [
-        "string",
-        "null"
-      ],
-      "default": "null"
-    },
-    {
-      "name": "age",
-      "type": [
-        "null",
-        "int"
-      ],
-      "default": null
-    },
-    {
-      "name": "email",
-      "type": [
-        "string",
-        "null"
-      ],
-      "default": "null"
-    }
-  ]
+    "type": "record",
+    "name": "User",
+    "fields": [
+        {
+            "name": "user_id",
+            "type": "int"
+        },
+        {
+            "name": "first_name",
+            "type": "string",
+            "default": "null"
+        },
+        {
+            "name": "last_name",
+            "type": "string",
+            "default": "null"
+        },
+        {
+            "name": "age",
+            "type": "int",
+            "default": 0
+        },
+        {
+            "name": "email",
+            "type": "string",
+            "default": "null"
+        }
+    ]
 }

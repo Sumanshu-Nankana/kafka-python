@@ -22,7 +22,7 @@ class AvroConsumerClass:
             {
                 "bootstrap.servers": bootstrap_server,
                 "group.id": self.group_id,
-                "auto.offset.reset": "latest",
+                "auto.offset.reset": "earliest",
             }
         )
         self.schema_registry_client = schema_registry_client
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     bootstrap_server = os.environ.get("KAFKA_BOOTSTRAP_SERVERS")
     topic = os.environ.get("KAFKA_TOPIC")
-    group_id = os.environ.get("KAFKA_GROUP_ID", "my-consumer-group")
+    group_id = os.environ.get("CONSUMER_GROUP_ID", "consumer-group-id")
     schema_registry_url = os.environ.get("SCHEMA_REGISTRY_URL")
     schema_type = "AVRO"
 

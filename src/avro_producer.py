@@ -126,7 +126,9 @@ if __name__ == "__main__":
     # Register the Schema
     with open("./schemas/schema.avsc") as avro_schema_file:
         avro_schema = avro_schema_file.read()
+
     schema_client = SchemaClient(schema_registry_url, topic, avro_schema, schema_type)
+    schema_client.set_compatibility("BACKWARD")
     schema_client.register_schema()
 
     # fetch schema_str from Schema Registry
